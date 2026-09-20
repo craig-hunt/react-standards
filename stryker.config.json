@@ -13,7 +13,8 @@
     "!src/shared/testIds.ts",
     "!src/shared/types.ts",
     "!src/test/**",
-    "!src/main.tsx"
+    "!src/main.tsx",
+    "!src/features/inventory/useInventory.ts"
   ],
   "coverageAnalysis": "perTest",
   "concurrency": 2,

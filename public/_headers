@@ -16,12 +16,15 @@
 # suite. Adding 'unsafe-eval' would let the suite cover it, at the price of
 # weakening the shipped artifact to suit the instrument measuring it.
 #
-# style-src keeps 'unsafe-inline' because Tailwind emits inline styles for a
-# handful of utilities. Removing it needs a nonce the host injects per
-# response, which a static file cannot express.
+# style-src is 'self' with no 'unsafe-inline'. An earlier version allowed it on
+# the assumption that Tailwind emits inline styles; the built output says
+# otherwise. Tailwind v4 compiles to the stylesheet asset, no component here
+# uses a style prop, and the built index.html carries no style block and no
+# style attribute. Allowing arbitrary inline CSS to cover a requirement that
+# does not exist is how a policy quietly stops being one.
 
 /*
-  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests
+  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests
   Referrer-Policy: strict-origin-when-cross-origin
   X-Content-Type-Options: nosniff
   Cross-Origin-Opener-Policy: same-origin

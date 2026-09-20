@@ -34,11 +34,24 @@ npm run mutation    # the mutation gate
 ## The standards
 
 **1. Test ids are a contract, and the attribute name lives once.** Every element
-a suite reaches carries `data-testid` from `src/shared/testIds.ts`, and
-`TEST_ID_ATTRIBUTE` is declared there and nowhere else. The ids match the
-sibling suites exactly, because a renamed id here breaks a suite in another
+a suite reaches carries `data-testid` from `src/shared/testIds.ts`. The ids match
+the sibling suites exactly, because a renamed id here breaks a suite in another
 repository. That is the point: the id is a promise the application makes, not a
 detail a suite invents.
+
+The name reaches the markup through `testId()`, spread into the element:
+
+```tsx
+<h1 {...testId(TaskTestId.Heading)}>
+```
+
+_Enforced by_ a convention test that scans every `.tsx` file and fails if any of
+them writes the attribute name itself. Both halves are needed, and the first
+version of this repository had neither: components wrote `data-testid=` by hand
+while `TEST_ID_ATTRIBUTE` sat exported and unread, so the single definition was
+a claim the code did not keep. A constant nothing reads is a comment wearing a
+constant's clothes. This is the React equivalent of the `TestId.For()` helper
+`blazor-standards` splats through `@attributes`.
 
 **2. The suite mirrors the contract rather than importing it.**
 `cypress/support/constants/testIds.ts` is a second copy of the same list, on
@@ -122,7 +135,26 @@ by more than color.
 and the run fails below 70%. Coverage says a line ran. Mutation says a test
 would have noticed if that line were wrong. Constants, types, and the entry
 point are excluded, because mutating a value that exists to be named proves
-nothing. Measured: **97.04% across 135 mutants, in 3 minutes 51 seconds.**
+nothing. Measured: **100% across 151 mutants, in 2 minutes 51 seconds.**
+
+`useInventory.ts` is excluded too, and for a reason worth stating rather than
+leaving as a line in a config file that cannot hold comments. A hook needs a
+renderer to exercise, which means a DOM, which is exactly what the narrowed
+runner below does not have. That is the same principle already excluding every
+`.tsx` file: mutation covers the rules, and the components that carry them are
+covered by render tests and the regression suite. An exclusion that raises a
+score without changing what is verified would be worth objecting to; this one
+moves a module to the layer that can actually test it.
+
+Two modules reached 100% only after the gate said otherwise, and both are worth
+recording. `testId.ts` sat at **zero**, with Stryker naming the mutant it could
+not kill: `return { [TEST_ID_ATTRIBUTE]: id }` becoming `return {}`, which
+strips every test id from the application while every suite in every sibling
+repository goes red and this gate stays silent. The helper carrying standard 1
+was unverified by the gate meant to prove tests notice, because it was exercised
+only through `.test.tsx` files the runner does not include. And the `catch` that
+normalizes unparsable JSON had never executed: every case in its file resolved
+`json()`, so the error path shipped untested. Both now have tests of their own.
 
 That time is the standard's other half. The first run took 17 minutes to reach
 22% and projected to about 75, because Stryker re-runs the suite once per
@@ -150,7 +182,17 @@ says why something is the way it is; what the code does is the code's job.
 because they ship files. This one routes in the browser, so it uses `/signup`.
 Each suite keeps its own routes constant for exactly this reason.
 
-**`aria-sort` sits on the header cell, not the sort button.** ARIA permits the
+**`aria-sort` sits on the header cell, not the sort button, and only on the
+sorted one.** ARIA's authoring guidance sets the attribute on the currently
+sorted column, then removes it and applies it to the new column as the sort
+moves. An earlier version of this repository emitted `aria-sort="none"` on the
+inactive headers and asserted that in two suites and in this file, which put all
+three columns in a state the guidance does not describe. It was the same mistake
+this section criticizes the siblings for, made one line further along. The
+attribute is now omitted from unsorted columns, and `AriaValue` carries no
+`None` member so nothing can drift back to it.
+
+ARIA permits the
 attribute on an element with the `columnheader` role and forbids it on a
 `button`. The sibling demo applications carry it on the button and their suites
 assert that defect into place; neither runs an accessibility check, which is how
@@ -196,9 +238,9 @@ cypress/support/test_cases/  assertions, no selectors
 | `npm run lint`         | the literal rule, feature boundaries, suite selector rules |
 | `npm run format:check` | Prettier                                                   |
 | `npm run typecheck`    | both TypeScript projects, application and suite            |
-| `npm run test`         | 84 unit and component tests                                |
-| `npm run test:run`     | 39 regression tests, including 4 axe checks                |
-| `npm run mutation`     | 135 mutants, 97.04% killed, failing below 70%              |
+| `npm run test`         | 108 unit and component tests                               |
+| `npm run test:run`     | 42 regression tests, including 4 axe checks                |
+| `npm run mutation`     | 151 mutants, 100% killed, failing below 70%                |
 | `npm audit --omit=dev` | advisories in shipped dependencies                         |
 
 Every number above is measured rather than aspirational. `npm run mutation`

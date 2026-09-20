@@ -72,7 +72,19 @@ export const InventoryCopy = {
   ColumnQuantity: 'Quantity',
   ColumnStatus: 'Status',
   NoResults: 'No items match that filter.',
+  Loading: 'Loading inventory.',
+  Error: 'The inventory could not be loaded.',
 } as const;
+
+/**
+ * The seat range, built from the limits rather than spelled beside them.
+ *
+ * A message reading "between 1 and 500" written as prose drifts the moment
+ * SeatLimit changes, and the drift is silent: the form still refuses the right
+ * values while telling the reader the wrong ones.
+ */
+export const seatsRangeMessage = (minimum: number, maximum: number): string =>
+  `Enter a whole number of seats between ${minimum} and ${maximum}.`;
 
 /**
  * Validation messages, rendered verbatim.
@@ -101,6 +113,7 @@ export const ElementId = {
   Terms: 'terms',
   TermsError: 'terms-error-text',
   Seats: 'seats',
+  SeatsError: 'seats-error-text',
   Notes: 'notes',
   Search: 'search',
   MainContent: 'main-content',
@@ -164,6 +177,15 @@ export const AriaAttribute = {
   Current: 'aria-current',
 } as const;
 
+/**
+ * No None value, deliberately.
+ *
+ * ARIA's authoring guidance sets aria-sort on the sorted column only, removing
+ * it and applying it to the new column as the sort moves. Emitting none on the
+ * others tells a screen reader three columns are sortable-but-unsorted where it
+ * expects one answer, so the attribute is omitted instead and no constant
+ * exists to tempt anyone back.
+ */
 export const AriaValue = {
   True: 'true',
   False: 'false',
@@ -171,7 +193,6 @@ export const AriaValue = {
   Page: 'page',
   Ascending: 'ascending',
   Descending: 'descending',
-  None: 'none',
 } as const;
 
 /**

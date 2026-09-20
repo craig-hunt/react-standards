@@ -91,15 +91,51 @@ describe('InventoryPage', () => {
     expect(screen.getByTestId(InventoryTestId.SortByName)).not.toHaveAttribute(AriaAttribute.Sort);
   });
 
-  it('reports the inactive columns as unsorted rather than omitting the attribute', async () => {
-    // A columnheader with no aria-sort reads as "not sortable". Reporting none
-    // says sortable and not currently sorted, which is the true state.
+  it('omits aria-sort from the columns that are not sorted', async () => {
+    // ARIA's authoring guidance sets aria-sort on the sorted column, then
+    // removes it and sets it on the new one as the sort moves. An earlier
+    // version of this test asserted none on the inactive headers, which put
+    // all three in a state the guidance does not describe and locked it in.
     renderWithProviders(<InventoryPage />);
     await screen.findAllByTestId(InventoryTestId.Row);
 
+    expect(screen.getByTestId(InventoryTestId.HeaderQuantity)).not.toHaveAttribute(
+      AriaAttribute.Sort
+    );
+    expect(screen.getByTestId(InventoryTestId.HeaderStatus)).not.toHaveAttribute(
+      AriaAttribute.Sort
+    );
+  });
+
+  it('moves aria-sort to the newly chosen column', async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<InventoryPage />);
+    await screen.findAllByTestId(InventoryTestId.Row);
+
+    await user.click(screen.getByTestId(InventoryTestId.SortByQuantity));
+
     expect(screen.getByTestId(InventoryTestId.HeaderQuantity)).toHaveAttribute(
       AriaAttribute.Sort,
-      AriaValue.None
+      AriaValue.Ascending
     );
+    expect(screen.getByTestId(InventoryTestId.HeaderName)).not.toHaveAttribute(AriaAttribute.Sort);
+  });
+
+  it('announces loading before any rows arrive', () => {
+    // No await: the assertion runs on the first render, while the query is
+    // still pending. Defaulting data to an empty array made this state render
+    // as a successful read of nothing.
+    renderWithProviders(<InventoryPage />);
+
+    expect(screen.getByTestId(InventoryTestId.Loading)).toBeVisible();
+    expect(screen.getByTestId(InventoryTestId.NoResults)).not.toBeVisible();
+    expect(screen.getByTestId(InventoryTestId.Table)).not.toBeVisible();
+  });
+
+  it('hides the loading message once rows arrive', async () => {
+    renderWithProviders(<InventoryPage />);
+    await screen.findAllByTestId(InventoryTestId.Row);
+
+    expect(screen.getByTestId(InventoryTestId.Loading)).not.toBeVisible();
   });
 });

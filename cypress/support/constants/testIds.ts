@@ -46,6 +46,7 @@ export const SignupTestId = {
   PlanSelect: 'plan-select',
   PlanError: 'plan-error',
   SeatsInput: 'seats-input',
+  SeatsError: 'seats-error',
   NotesTextarea: 'notes-textarea',
   TermsCheckbox: 'terms-checkbox',
   TermsError: 'terms-error',

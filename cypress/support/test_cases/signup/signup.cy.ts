@@ -2,10 +2,13 @@ import { signupActions } from '../../actions/signupActions';
 import { AriaAttribute, AriaValue } from '../../constants/aria';
 import {
   INVALID_EMAIL,
+  INVALID_SEATS,
   PLAN_LABEL,
+  SEAT_LIMIT,
   VALID_SIGNUP,
   ValidationMessage,
   confirmationSummary,
+  seatsRangeMessage,
 } from '../../constants/testData';
 import { signupRepository } from '../../repositories/signupRepository';
 
@@ -18,6 +21,7 @@ describe('Signup', () => {
     signupRepository.fullNameError().should('not.be.visible');
     signupRepository.emailError().should('not.be.visible');
     signupRepository.planError().should('not.be.visible');
+    signupRepository.seatsError().should('not.be.visible');
     signupRepository.termsError().should('not.be.visible');
   });
 
@@ -53,6 +57,29 @@ describe('Signup', () => {
         .emailInput()
         .should('have.attr', AriaAttribute.DescribedBy, error.attr('id'));
     });
+  });
+
+  it('refuses a cleared seats field rather than confirming NaN seats', () => {
+    // The form sets noValidate, so the browser enforces neither the numeric
+    // type nor the min and max on the input. Before the rule existed, an
+    // emptied field reached the confirmation and rendered NaN seat(s).
+    signupActions.fill(VALID_SIGNUP);
+    signupActions.clearSeats();
+    signupActions.submit();
+
+    signupRepository
+      .seatsError()
+      .should('have.text', seatsRangeMessage(SEAT_LIMIT.Minimum, SEAT_LIMIT.Maximum));
+    signupRepository.confirmation().should('not.be.visible');
+  });
+
+  it('refuses a seat count below the minimum', () => {
+    signupActions.fill(VALID_SIGNUP);
+    signupActions.typeSeats(INVALID_SEATS);
+    signupActions.submit();
+
+    signupRepository.seatsInput().should('have.attr', AriaAttribute.Invalid, AriaValue.True);
+    signupRepository.confirmation().should('not.be.visible');
   });
 
   it('reports a field valid again once it is corrected', () => {

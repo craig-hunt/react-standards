@@ -66,7 +66,7 @@ export interface SignupDetails {
   readonly acceptTerms: boolean;
 }
 
-export type SignupField = 'fullName' | 'email' | 'plan' | 'terms';
+export type SignupField = 'fullName' | 'email' | 'plan' | 'seats' | 'terms';
 
 export type SignupErrors = Partial<Record<SignupField, string>>;
 

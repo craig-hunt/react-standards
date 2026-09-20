@@ -25,7 +25,18 @@ export async function loadRuntimeConfig(fetcher: typeof fetch = fetch): Promise<
     throw new Error(RuntimeConfigError.Unreachable);
   }
 
-  const parsed: unknown = await response.json();
+  // response.json() rejects with a native SyntaxError on malformed JSON, which
+  // would escape this boundary carrying a message about an unexpected token at
+  // some column. That reads as a bug in the application rather than as a bad
+  // file on the host, so the parse failure is normalized to the same kind of
+  // error every other failure here produces.
+  let parsed: unknown;
+  try {
+    parsed = await response.json();
+  } catch {
+    throw new Error(RuntimeConfigError.Unparsable);
+  }
+
   if (!isRuntimeConfig(parsed)) {
     throw new Error(RuntimeConfigError.Malformed);
   }

@@ -31,6 +31,16 @@ export const signupActions = {
     signupRepository.emailInput().type(email);
   },
 
+  typeSeats: (seats: string): void => {
+    signupRepository.seatsInput().clear();
+    signupRepository.seatsInput().type(seats);
+  },
+
+  /** Leaves the field empty, which reaches the validator as NaN. */
+  clearSeats: (): void => {
+    signupRepository.seatsInput().clear();
+  },
+
   submit: (): void => {
     signupRepository.submitButton().click();
   },

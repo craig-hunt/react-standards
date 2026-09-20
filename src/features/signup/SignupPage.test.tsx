@@ -127,4 +127,43 @@ describe('SignupPage', () => {
     expect(screen.getByTestId(SignupTestId.Form)).not.toBeVisible();
     expect(screen.getByTestId(SignupTestId.Confirmation)).toBeVisible();
   });
+
+  // The wording of the seat message is pinned in signupValidator.test.ts.
+  // These assert the screen surfaces it and wires it up, which is the part a
+  // rule test cannot see.
+
+  it('refuses a cleared seats field rather than confirming NaN seats', async () => {
+    // The form sets noValidate, so nothing else stops this. Before the rule
+    // existed, an emptied field reached the confirmation and rendered
+    // NaN seat(s) to the reader.
+    const user = userEvent.setup();
+    renderWithProviders(<SignupPage />);
+
+    await fillValidForm(user);
+    await user.clear(screen.getByTestId(SignupTestId.SeatsInput));
+    await user.click(screen.getByTestId(SignupTestId.SubmitButton));
+
+    expect(screen.getByTestId(SignupTestId.SeatsError)).toBeVisible();
+    expect(screen.getByTestId(SignupTestId.Confirmation)).not.toBeVisible();
+  });
+
+  it('marks the seats field invalid and names its message', async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<SignupPage />);
+
+    await fillValidForm(user);
+    await user.clear(screen.getByTestId(SignupTestId.SeatsInput));
+    await user.click(screen.getByTestId(SignupTestId.SubmitButton));
+
+    const input = screen.getByTestId(SignupTestId.SeatsInput);
+    const error = screen.getByTestId(SignupTestId.SeatsError);
+    expect(input).toHaveAttribute(AriaAttribute.Invalid, AriaValue.True);
+    expect(input).toHaveAttribute(AriaAttribute.DescribedBy, error.id);
+  });
+
+  it('hides the seats error until the form is submitted', () => {
+    renderWithProviders(<SignupPage />);
+
+    expect(screen.getByTestId(SignupTestId.SeatsError)).not.toBeVisible();
+  });
 });

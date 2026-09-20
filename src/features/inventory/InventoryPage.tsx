@@ -11,8 +11,10 @@ import {
   Surface,
   resultCountLabel,
 } from '../../shared/constants';
+import { testId } from '../../shared/testId';
 import { InventoryTestId } from '../../shared/testIds';
 import { SortColumn, SortDirection } from '../../shared/types';
+import type { InventoryItem } from '../../shared/types';
 
 /**
  * The inventory table.
@@ -28,13 +30,20 @@ import { SortColumn, SortDirection } from '../../shared/types';
  * an accessibility check, which is how it survived. blazor-standards reached the
  * same conclusion independently.
  */
+const NO_ITEMS: readonly InventoryItem[] = [];
+
 export function InventoryPage() {
   const inventory = useInventory();
   const [term, setTerm] = useState(EmptyText);
   const [column, setColumn] = useState<SortColumn>(SortColumn.Name);
   const [direction, setDirection] = useState<SortDirection>(SortDirection.Ascending);
 
-  const items = inventory.data ?? [];
+  // Only a settled, successful read produces rows. Defaulting the query's data
+  // to an empty array instead would make three different situations render
+  // identically: rows still arriving, rows that failed to arrive, and a filter
+  // that genuinely matched nothing. The screen would announce no results before
+  // it had asked, and an outage would read as an empty warehouse.
+  const items = inventory.isSuccess ? inventory.data : NO_ITEMS;
   const shown = visibleItems(items, term, column, direction);
 
   function sortBy(clicked: SortColumn) {
@@ -44,18 +53,25 @@ export function InventoryPage() {
   }
 
   /**
+   * The sorted column's direction, and undefined for every other column.
+   *
+   * React omits an attribute whose value is undefined, which is what ARIA's
+   * authoring guidance asks for: aria-sort is set on the currently sorted
+   * column, then removed and set on the new one as the sort moves. An earlier
+   * version returned none for inactive columns and a test asserted it, which
+   * put all three headers in a state the guidance does not describe.
+   *
    * The return type comes from React's own attribute types rather than being
-   * written as string. ARIA defines four permitted values, and a helper typed
-   * as string would let any of them be misspelled into an attribute a screen
-   * reader silently ignores.
+   * written as string, so a misspelled value cannot become an attribute a
+   * screen reader silently ignores.
    */
   function sortValue(candidate: SortColumn): AriaAttributes['aria-sort'] {
-    return column === candidate ? direction : AriaValue.None;
+    return column === candidate ? direction : undefined;
   }
 
   return (
     <>
-      <h1 data-testid={InventoryTestId.Heading} className={Surface.PageHeading}>
+      <h1 {...testId(InventoryTestId.Heading)} className={Surface.PageHeading}>
         {InventoryCopy.Heading}
       </h1>
 
@@ -67,7 +83,7 @@ export function InventoryPage() {
           <div className={Surface.Row}>
             <input
               id={ElementId.Search}
-              data-testid={InventoryTestId.Search}
+              {...testId(InventoryTestId.Search)}
               type="search"
               value={term}
               placeholder={InventoryCopy.SearchPlaceholder}
@@ -76,7 +92,7 @@ export function InventoryPage() {
             />
             <button
               type="button"
-              data-testid={InventoryTestId.ResetButton}
+              {...testId(InventoryTestId.ResetButton)}
               onClick={() => setTerm(EmptyText)}
               className={Surface.Quiet}
             >
@@ -85,26 +101,52 @@ export function InventoryPage() {
           </div>
         </div>
 
+        {/* Three states, told apart. Rows still arriving, rows that failed to
+            arrive, and rows that arrived. Only the last renders a table, so a
+            reader is never told there are no matches before anything was
+            asked, and an outage never reads as an empty warehouse. */}
         <p
-          data-testid={InventoryTestId.ResultCount}
+          {...testId(InventoryTestId.Loading)}
+          hidden={!inventory.isPending}
+          className={Surface.Muted}
+        >
+          {InventoryCopy.Loading}
+        </p>
+
+        <p
+          {...testId(InventoryTestId.Error)}
+          role="alert"
+          hidden={!inventory.isError}
+          className={Surface.Error}
+        >
+          {InventoryCopy.Error}
+        </p>
+
+        <p
+          {...testId(InventoryTestId.ResultCount)}
           aria-live={AriaValue.Polite}
+          hidden={!inventory.isSuccess}
           className={Surface.Muted}
         >
           {resultCountLabel(shown.length, items.length)}
         </p>
 
-        <table data-testid={InventoryTestId.Table} className={Surface.Table}>
+        <table
+          {...testId(InventoryTestId.Table)}
+          hidden={!inventory.isSuccess}
+          className={Surface.Table}
+        >
           <thead className={Surface.TableHead}>
             <tr>
               <th
                 scope="col"
-                data-testid={InventoryTestId.HeaderName}
+                {...testId(InventoryTestId.HeaderName)}
                 aria-sort={sortValue(SortColumn.Name)}
                 className={Surface.HeaderCell}
               >
                 <button
                   type="button"
-                  data-testid={InventoryTestId.SortByName}
+                  {...testId(InventoryTestId.SortByName)}
                   onClick={() => sortBy(SortColumn.Name)}
                 >
                   {InventoryCopy.ColumnName}
@@ -112,13 +154,13 @@ export function InventoryPage() {
               </th>
               <th
                 scope="col"
-                data-testid={InventoryTestId.HeaderQuantity}
+                {...testId(InventoryTestId.HeaderQuantity)}
                 aria-sort={sortValue(SortColumn.Quantity)}
                 className={Surface.HeaderCell}
               >
                 <button
                   type="button"
-                  data-testid={InventoryTestId.SortByQuantity}
+                  {...testId(InventoryTestId.SortByQuantity)}
                   onClick={() => sortBy(SortColumn.Quantity)}
                 >
                   {InventoryCopy.ColumnQuantity}
@@ -126,13 +168,13 @@ export function InventoryPage() {
               </th>
               <th
                 scope="col"
-                data-testid={InventoryTestId.HeaderStatus}
+                {...testId(InventoryTestId.HeaderStatus)}
                 aria-sort={sortValue(SortColumn.Status)}
                 className={Surface.HeaderCell}
               >
                 <button
                   type="button"
-                  data-testid={InventoryTestId.SortByStatus}
+                  {...testId(InventoryTestId.SortByStatus)}
                   onClick={() => sortBy(SortColumn.Status)}
                 >
                   {InventoryCopy.ColumnStatus}
@@ -140,16 +182,16 @@ export function InventoryPage() {
               </th>
             </tr>
           </thead>
-          <tbody data-testid={InventoryTestId.Body}>
+          <tbody {...testId(InventoryTestId.Body)}>
             {shown.map((item) => (
-              <tr key={item.name} data-testid={InventoryTestId.Row}>
-                <td data-testid={InventoryTestId.ItemName} className={Surface.Cell}>
+              <tr key={item.name} {...testId(InventoryTestId.Row)}>
+                <td {...testId(InventoryTestId.ItemName)} className={Surface.Cell}>
                   {item.name}
                 </td>
-                <td data-testid={InventoryTestId.ItemQuantity} className={Surface.Cell}>
+                <td {...testId(InventoryTestId.ItemQuantity)} className={Surface.Cell}>
                   {item.quantity}
                 </td>
-                <td data-testid={InventoryTestId.ItemStatus} className={Surface.Cell}>
+                <td {...testId(InventoryTestId.ItemStatus)} className={Surface.Cell}>
                   {item.status}
                 </td>
               </tr>
@@ -157,9 +199,11 @@ export function InventoryPage() {
           </tbody>
         </table>
 
+        {/* Only after a successful read. Hidden on shown.length alone, this
+            announced no matches while the first request was still in flight. */}
         <p
-          data-testid={InventoryTestId.NoResults}
-          hidden={shown.length > 0}
+          {...testId(InventoryTestId.NoResults)}
+          hidden={!inventory.isSuccess || shown.length > 0}
           className={Surface.Muted}
         >
           {InventoryCopy.NoResults}

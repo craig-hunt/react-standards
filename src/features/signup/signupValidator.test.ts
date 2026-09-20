@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import { EMPTY_SIGNUP } from './constants';
 import { isValid, validateSignup } from './signupValidator';
-import { ValidationMessage } from '../../shared/constants';
+import { SeatLimit, ValidationMessage, seatsRangeMessage } from '../../shared/constants';
 import { Plan } from '../../shared/types';
 import type { SignupDetails } from '../../shared/types';
 
@@ -12,6 +12,9 @@ const INVALID_EMAIL = 'dana.whitfield.example.com';
 const WHITESPACE = '   ';
 const PADDED_EMAIL = '  dana.whitfield@example.com  ';
 const SEATS = 12;
+const TOO_FEW_SEATS = 0;
+const TOO_MANY_SEATS = 501;
+const FRACTIONAL_SEATS = 2.5;
 
 function validDetails(): SignupDetails {
   return {
@@ -80,6 +83,51 @@ describe('validateSignup', () => {
     expect(errors.email).toBe(ValidationMessage.EmailRequired);
     expect(errors.plan).toBe(ValidationMessage.PlanRequired);
     expect(errors.terms).toBe(ValidationMessage.TermsRequired);
+  });
+});
+
+describe('validateSignup, seats', () => {
+  // The form sets noValidate, so the browser enforces neither the input's type
+  // nor its min and max. These checks are the only gate.
+
+  it('rejects a cleared field, which arrives as NaN', () => {
+    // The defect this rule exists for. NaN passed every other check, reached
+    // the confirmation, and rendered NaN seat(s) to the reader.
+    const errors = validateSignup({ ...validDetails(), seats: Number.NaN });
+
+    expect(errors.seats).toBe(seatsRangeMessage(SeatLimit.Minimum, SeatLimit.Maximum));
+  });
+
+  it('rejects fewer seats than the minimum', () => {
+    const errors = validateSignup({ ...validDetails(), seats: TOO_FEW_SEATS });
+
+    expect(errors.seats).toBe(seatsRangeMessage(SeatLimit.Minimum, SeatLimit.Maximum));
+  });
+
+  it('rejects more seats than the maximum', () => {
+    const errors = validateSignup({ ...validDetails(), seats: TOO_MANY_SEATS });
+
+    expect(errors.seats).toBe(seatsRangeMessage(SeatLimit.Minimum, SeatLimit.Maximum));
+  });
+
+  it('rejects a fractional seat', () => {
+    const errors = validateSignup({ ...validDetails(), seats: FRACTIONAL_SEATS });
+
+    expect(errors.seats).toBeDefined();
+  });
+
+  it('accepts the minimum', () => {
+    const errors = validateSignup({ ...validDetails(), seats: SeatLimit.Minimum });
+
+    expect(errors.seats).toBeUndefined();
+  });
+
+  it('accepts the maximum', () => {
+    // Both boundaries, because an off-by-one here refuses a legitimate order
+    // and says nothing about why.
+    const errors = validateSignup({ ...validDetails(), seats: SeatLimit.Maximum });
+
+    expect(errors.seats).toBeUndefined();
   });
 });
 

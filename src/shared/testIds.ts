@@ -48,6 +48,14 @@ export const SignupTestId = {
   PlanSelect: 'plan-select',
   PlanError: 'plan-error',
   SeatsInput: 'seats-input',
+
+  /**
+   * Seats is validated like every other field, so its message needs somewhere
+   * to live. The sibling demo applications never validate it, which is why
+   * this id has no counterpart there. An addition, not a rename.
+   */
+  SeatsError: 'seats-error',
+
   NotesTextarea: 'notes-textarea',
   TermsCheckbox: 'terms-checkbox',
   TermsError: 'terms-error',
@@ -72,6 +80,14 @@ export const InventoryTestId = {
   SortByQuantity: 'sort-by-quantity',
   SortByStatus: 'sort-by-status',
   NoResults: 'no-results',
+
+  /**
+   * Reading is asynchronous, so the screen has states the sibling demo
+   * applications never had: rows not yet arrived, and rows that failed to
+   * arrive. Both need somewhere to be asserted. Additions, not renames.
+   */
+  Loading: 'inventory-loading',
+  Error: 'inventory-error',
 
   /**
    * The header cells, which the sibling demo applications do not expose.

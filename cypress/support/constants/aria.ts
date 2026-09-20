@@ -10,11 +10,13 @@ export const AriaAttribute = {
   DescribedBy: 'aria-describedby',
 } as const;
 
+// No None value. ARIA expects aria-sort on the sorted column only, removed and
+// reapplied as the sort moves, so the suite asserts the attribute is absent
+// from an inactive header rather than that it reads none.
 export const AriaValue = {
   True: 'true',
   False: 'false',
   Page: 'page',
   Ascending: 'ascending',
   Descending: 'descending',
-  None: 'none',
 } as const;

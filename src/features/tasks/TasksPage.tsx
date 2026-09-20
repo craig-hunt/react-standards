@@ -21,9 +21,10 @@ import {
   markCompleteLabel,
   remainingLabel,
 } from '../../shared/constants';
+import { testId } from '../../shared/testId';
+import { TaskTestId } from '../../shared/testIds';
 import { TaskActionKind, TaskFilter } from '../../shared/types';
 import type { Task } from '../../shared/types';
-import { TaskTestId } from '../../shared/testIds';
 
 /**
  * The task list.
@@ -71,12 +72,12 @@ export function TasksPage() {
 
   return (
     <>
-      <h1 data-testid={TaskTestId.Heading} className={Surface.PageHeading}>
+      <h1 {...testId(TaskTestId.Heading)} className={Surface.PageHeading}>
         {TaskCopy.Heading}
       </h1>
 
       <form
-        data-testid={TaskTestId.Form}
+        {...testId(TaskTestId.Form)}
         onSubmit={submit}
         autoComplete="off"
         className={Surface.Section}
@@ -88,14 +89,14 @@ export function TasksPage() {
           <div className={Surface.Row}>
             <input
               id={ElementId.NewTask}
-              data-testid={TaskTestId.Input}
+              {...testId(TaskTestId.Input)}
               type="text"
               value={title}
               placeholder={TaskCopy.AddPlaceholder}
               onChange={(event) => setTitle(event.target.value)}
               className={Surface.Input}
             />
-            <button type="submit" data-testid={TaskTestId.AddButton} className={Surface.Action}>
+            <button type="submit" {...testId(TaskTestId.AddButton)} className={Surface.Action}>
               {TaskCopy.AddButton}
             </button>
           </div>
@@ -104,16 +105,16 @@ export function TasksPage() {
 
       {/* Polite rather than assertive: the count changes as a result of what
           the reader just did, so announcing it need not interrupt them. */}
-      <p data-testid={TaskTestId.Count} aria-live={AriaValue.Polite} className={Surface.Muted}>
+      <p {...testId(TaskTestId.Count)} aria-live={AriaValue.Polite} className={Surface.Muted}>
         {remainingLabel(remainingCount(tasks), tasks.length)}
       </p>
 
-      <ul data-testid={TaskTestId.List} className={Surface.List}>
+      <ul {...testId(TaskTestId.List)} className={Surface.List}>
         {shown.map((task) => (
-          <li key={task.id} data-testid={TaskTestId.Item} className={Surface.ListRow}>
+          <li key={task.id} {...testId(TaskTestId.Item)} className={Surface.ListRow}>
             <input
               type="checkbox"
-              data-testid={TaskTestId.ItemCheckbox}
+              {...testId(TaskTestId.ItemCheckbox)}
               checked={task.completed}
               aria-label={markCompleteLabel(task.title)}
               onChange={() => dispatch({ kind: TaskActionKind.Toggle, id: task.id })}
@@ -121,14 +122,14 @@ export function TasksPage() {
             {/* Completion reads through the checkbox state as well as the
                 strike-through, so it does not depend on seeing a color. */}
             <span
-              data-testid={TaskTestId.ItemTitle}
+              {...testId(TaskTestId.ItemTitle)}
               className={task.completed ? Surface.Completed : EmptyText}
             >
               {task.title}
             </span>
             <button
               type="button"
-              data-testid={TaskTestId.DeleteButton}
+              {...testId(TaskTestId.DeleteButton)}
               aria-label={deleteTaskLabel(task.title)}
               onClick={() => dispatch({ kind: TaskActionKind.Remove, id: task.id })}
               className={Surface.Quiet}
@@ -140,14 +141,14 @@ export function TasksPage() {
       </ul>
 
       <div
-        data-testid={TaskTestId.Filters}
+        {...testId(TaskTestId.Filters)}
         role="group"
         aria-label={TaskCopy.FilterGroupLabel}
         className={Surface.Row}
       >
         <button
           type="button"
-          data-testid={TaskTestId.FilterAll}
+          {...testId(TaskTestId.FilterAll)}
           aria-pressed={filter === TaskFilter.All}
           onClick={() => setFilter(TaskFilter.All)}
           className={Surface.Toggle}
@@ -156,7 +157,7 @@ export function TasksPage() {
         </button>
         <button
           type="button"
-          data-testid={TaskTestId.FilterActive}
+          {...testId(TaskTestId.FilterActive)}
           aria-pressed={filter === TaskFilter.Active}
           onClick={() => setFilter(TaskFilter.Active)}
           className={Surface.Toggle}
@@ -165,7 +166,7 @@ export function TasksPage() {
         </button>
         <button
           type="button"
-          data-testid={TaskTestId.FilterCompleted}
+          {...testId(TaskTestId.FilterCompleted)}
           aria-pressed={filter === TaskFilter.Completed}
           onClick={() => setFilter(TaskFilter.Completed)}
           className={Surface.Toggle}
@@ -176,7 +177,7 @@ export function TasksPage() {
 
       <button
         type="button"
-        data-testid={TaskTestId.ClearCompletedButton}
+        {...testId(TaskTestId.ClearCompletedButton)}
         hidden={!hasCompleted(tasks)}
         onClick={() => dispatch({ kind: TaskActionKind.Clear })}
         className={Surface.Quiet}
@@ -184,7 +185,7 @@ export function TasksPage() {
         {TaskCopy.ClearCompleted}
       </button>
 
-      <p data-testid={TaskTestId.EmptyState} hidden={shown.length > 0} className={Surface.Muted}>
+      <p {...testId(TaskTestId.EmptyState)} hidden={shown.length > 0} className={Surface.Muted}>
         {TaskCopy.EmptyState}
       </p>
     </>

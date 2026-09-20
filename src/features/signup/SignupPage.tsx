@@ -13,6 +13,7 @@ import {
   Surface,
   confirmationSummary,
 } from '../../shared/constants';
+import { testId } from '../../shared/testId';
 import { SignupTestId } from '../../shared/testIds';
 import { SignupStateKind } from '../../shared/types';
 import type { Plan, SignupDetails, SignupState } from '../../shared/types';
@@ -65,12 +66,12 @@ export function SignupPage() {
 
   return (
     <>
-      <h1 data-testid={SignupTestId.Heading} className={Surface.PageHeading}>
+      <h1 {...testId(SignupTestId.Heading)} className={Surface.PageHeading}>
         {SignupCopy.Heading}
       </h1>
 
       <form
-        data-testid={SignupTestId.Form}
+        {...testId(SignupTestId.Form)}
         onSubmit={submit}
         noValidate
         autoComplete="off"
@@ -83,7 +84,7 @@ export function SignupPage() {
           </label>
           <input
             id={ElementId.FullName}
-            data-testid={SignupTestId.FullNameInput}
+            {...testId(SignupTestId.FullNameInput)}
             type="text"
             value={details.fullName}
             aria-invalid={errors.fullName !== undefined}
@@ -93,7 +94,7 @@ export function SignupPage() {
           />
           <p
             id={ElementId.FullNameError}
-            data-testid={SignupTestId.FullNameError}
+            {...testId(SignupTestId.FullNameError)}
             hidden={errors.fullName === undefined}
             className={Surface.Error}
           >
@@ -107,7 +108,7 @@ export function SignupPage() {
           </label>
           <input
             id={ElementId.Email}
-            data-testid={SignupTestId.EmailInput}
+            {...testId(SignupTestId.EmailInput)}
             type="email"
             value={details.email}
             aria-invalid={errors.email !== undefined}
@@ -117,7 +118,7 @@ export function SignupPage() {
           />
           <p
             id={ElementId.EmailError}
-            data-testid={SignupTestId.EmailError}
+            {...testId(SignupTestId.EmailError)}
             hidden={errors.email === undefined}
             className={Surface.Error}
           >
@@ -131,7 +132,7 @@ export function SignupPage() {
           </label>
           <select
             id={ElementId.Plan}
-            data-testid={SignupTestId.PlanSelect}
+            {...testId(SignupTestId.PlanSelect)}
             value={details.plan}
             aria-invalid={errors.plan !== undefined}
             aria-describedby={errors.plan === undefined ? undefined : ElementId.PlanError}
@@ -147,7 +148,7 @@ export function SignupPage() {
           </select>
           <p
             id={ElementId.PlanError}
-            data-testid={SignupTestId.PlanError}
+            {...testId(SignupTestId.PlanError)}
             hidden={errors.plan === undefined}
             className={Surface.Error}
           >
@@ -159,17 +160,30 @@ export function SignupPage() {
           <label htmlFor={ElementId.Seats} className={Surface.Label}>
             {SignupCopy.SeatsLabel}
           </label>
+          {/* min and max are advisory here: noValidate turns the browser's own
+              enforcement off, so signupValidator is the only gate. They stay
+              because they tell a screen reader the permitted range. */}
           <input
             id={ElementId.Seats}
-            data-testid={SignupTestId.SeatsInput}
+            {...testId(SignupTestId.SeatsInput)}
             type="number"
             inputMode="numeric"
             min={SeatLimit.Minimum}
             max={SeatLimit.Maximum}
             value={details.seats}
+            aria-invalid={errors.seats !== undefined}
+            aria-describedby={errors.seats === undefined ? undefined : ElementId.SeatsError}
             onChange={(event) => update(SignupFieldName.Seats, event.target.valueAsNumber)}
             className={Surface.Input}
           />
+          <p
+            id={ElementId.SeatsError}
+            {...testId(SignupTestId.SeatsError)}
+            hidden={errors.seats === undefined}
+            className={Surface.Error}
+          >
+            {errors.seats ?? EmptyText}
+          </p>
         </div>
 
         <div className={Surface.Field}>
@@ -178,7 +192,7 @@ export function SignupPage() {
           </label>
           <textarea
             id={ElementId.Notes}
-            data-testid={SignupTestId.NotesTextarea}
+            {...testId(SignupTestId.NotesTextarea)}
             rows={NotesRows}
             value={details.notes}
             onChange={(event) => update(SignupFieldName.Notes, event.target.value)}
@@ -190,7 +204,7 @@ export function SignupPage() {
           <div className={Surface.Row}>
             <input
               id={ElementId.Terms}
-              data-testid={SignupTestId.TermsCheckbox}
+              {...testId(SignupTestId.TermsCheckbox)}
               type="checkbox"
               checked={details.acceptTerms}
               aria-invalid={errors.terms !== undefined}
@@ -203,7 +217,7 @@ export function SignupPage() {
           </div>
           <p
             id={ElementId.TermsError}
-            data-testid={SignupTestId.TermsError}
+            {...testId(SignupTestId.TermsError)}
             hidden={errors.terms === undefined}
             className={Surface.Error}
           >
@@ -212,7 +226,7 @@ export function SignupPage() {
         </div>
 
         <div className={Surface.Row}>
-          <button type="submit" data-testid={SignupTestId.SubmitButton} className={Surface.Action}>
+          <button type="submit" {...testId(SignupTestId.SubmitButton)} className={Surface.Action}>
             {SignupCopy.Submit}
           </button>
         </div>
@@ -222,16 +236,16 @@ export function SignupPage() {
           keeps a keyboard user where they were while still telling a screen
           reader the submission succeeded. */}
       <div
-        data-testid={SignupTestId.Confirmation}
+        {...testId(SignupTestId.Confirmation)}
         role="status"
         aria-live={AriaValue.Polite}
         hidden={!submitted}
         className={Surface.Confirmation}
       >
-        <h2 data-testid={SignupTestId.ConfirmationHeading} className={Surface.PageHeading}>
+        <h2 {...testId(SignupTestId.ConfirmationHeading)} className={Surface.PageHeading}>
           {SignupCopy.ConfirmationHeading}
         </h2>
-        <p data-testid={SignupTestId.ConfirmationSummary} className={Surface.Muted}>
+        <p {...testId(SignupTestId.ConfirmationSummary)} className={Surface.Muted}>
           {state.kind === SignupStateKind.Submitted ? state.summary : EmptyText}
         </p>
       </div>

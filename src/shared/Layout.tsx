@@ -1,6 +1,7 @@
 import { NavLink, Outlet } from 'react-router';
 
 import { AppRoute, ElementId, HashPrefix, LayoutCopy, NavLabel, Surface } from './constants';
+import { testId } from './testId';
 import { NavTestId } from './testIds';
 
 /**
@@ -11,6 +12,10 @@ import { NavTestId } from './testIds';
  * keyboard user a way past the navigation without tabbing through it on every
  * page. Both are WCAG 2.2 AA requirements that a visual review never surfaces,
  * because neither is visible until it is needed.
+ *
+ * Test ids arrive through testId() rather than as a written attribute, so the
+ * attribute name flows from TEST_ID_ATTRIBUTE to the markup instead of being
+ * typed alongside it.
  */
 export function Layout() {
   return (
@@ -19,16 +24,16 @@ export function Layout() {
         {LayoutCopy.SkipToContent}
       </a>
 
-      <nav data-testid={NavTestId.Container} className={Surface.Nav}>
-        <NavLink to={AppRoute.Tasks} end data-testid={NavTestId.Tasks} className={Surface.NavLink}>
+      <nav {...testId(NavTestId.Container)} className={Surface.Nav}>
+        <NavLink to={AppRoute.Tasks} end {...testId(NavTestId.Tasks)} className={Surface.NavLink}>
           {NavLabel.Tasks}
         </NavLink>
-        <NavLink to={AppRoute.Signup} data-testid={NavTestId.Signup} className={Surface.NavLink}>
+        <NavLink to={AppRoute.Signup} {...testId(NavTestId.Signup)} className={Surface.NavLink}>
           {NavLabel.Signup}
         </NavLink>
         <NavLink
           to={AppRoute.Inventory}
-          data-testid={NavTestId.Inventory}
+          {...testId(NavTestId.Inventory)}
           className={Surface.NavLink}
         >
           {NavLabel.Inventory}

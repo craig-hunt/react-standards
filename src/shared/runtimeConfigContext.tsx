@@ -30,7 +30,7 @@ export function RuntimeConfigProvider({ value, children }: ProviderProps) {
 export function useRuntimeConfig(): RuntimeConfig {
   const config = use(RuntimeConfigContext);
   if (config === null) {
-    throw new Error(RuntimeConfigError.Unreachable);
+    throw new Error(RuntimeConfigError.MissingProvider);
   }
 
   return config;

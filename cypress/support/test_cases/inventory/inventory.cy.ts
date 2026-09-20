@@ -73,9 +73,21 @@ describe('Inventory', () => {
     inventoryRepository.sortByNameButton().should('not.have.attr', AriaAttribute.Sort);
   });
 
-  it('reports an inactive column as unsorted rather than omitting the attribute', () => {
-    // A columnheader with no aria-sort reads as "not sortable". Reporting none
-    // says sortable and not currently sorted, which is the true state.
-    inventoryRepository.statusHeader().should('have.attr', AriaAttribute.Sort, AriaValue.None);
+  it('omits aria-sort from the columns that are not sorted', () => {
+    // ARIA's authoring guidance sets the attribute on the sorted column and
+    // removes it from the others as the sort moves. An earlier version of this
+    // test asserted none on an inactive header, which described a state the
+    // guidance does not define and held the application in it.
+    inventoryRepository.quantityHeader().should('not.have.attr', AriaAttribute.Sort);
+    inventoryRepository.statusHeader().should('not.have.attr', AriaAttribute.Sort);
+  });
+
+  it('moves aria-sort off the previous column when the sort changes', () => {
+    inventoryActions.sortByQuantity();
+
+    inventoryRepository
+      .quantityHeader()
+      .should('have.attr', AriaAttribute.Sort, AriaValue.Ascending);
+    inventoryRepository.nameHeader().should('not.have.attr', AriaAttribute.Sort);
   });
 });

@@ -32,7 +32,32 @@ export const PLAN_LABEL = {
   Enterprise: 'Enterprise',
 } as const;
 
+/**
+ * The visible label text, which is also the control's accessible name.
+ *
+ * The tier-two selector test reaches a control through this text rather than
+ * through a test id, so it belongs to the suite's vocabulary rather than to any
+ * one page object.
+ */
+export const SignupLabel = {
+  FullName: 'Full name',
+  Email: 'Work email',
+  Plan: 'Plan',
+  Seats: 'Seats',
+} as const;
+
 export const INVALID_EMAIL = 'dana.whitfield.example.com';
+
+export const SEAT_LIMIT = {
+  Minimum: 1,
+  Maximum: 500,
+} as const;
+
+/** Mirrors the application's builder, for the same reason the ids are mirrored. */
+export const seatsRangeMessage = (minimum: number, maximum: number): string =>
+  `Enter a whole number of seats between ${minimum} and ${maximum}.`;
+
+export const INVALID_SEATS = '0';
 
 /**
  * The counter's shape, named once.

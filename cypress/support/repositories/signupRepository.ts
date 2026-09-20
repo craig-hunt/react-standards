@@ -17,6 +17,7 @@ export const signupRepository = {
   planSelect: () => cy.getByTestId(SignupTestId.PlanSelect),
   planError: () => cy.getByTestId(SignupTestId.PlanError),
   seatsInput: () => cy.getByTestId(SignupTestId.SeatsInput),
+  seatsError: () => cy.getByTestId(SignupTestId.SeatsError),
   notesTextarea: () => cy.getByTestId(SignupTestId.NotesTextarea),
   termsCheckbox: () => cy.getByTestId(SignupTestId.TermsCheckbox),
   termsError: () => cy.getByTestId(SignupTestId.TermsError),

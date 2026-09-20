@@ -137,9 +137,15 @@ describe('nextId', () => {
     expect(nextId([])).toBe(FIRST_ID);
   });
 
-  it('does not reuse an id after the highest task is removed', () => {
-    // A count-based next id would hand out 2 here, which the surviving task
-    // already holds, and two rows would then share a React key and a checkbox.
+  it('hands out an id no surviving task holds', () => {
+    // The invariant that matters, and the one a count-based implementation
+    // breaks: with the first row gone, a count of 1 yields 2, which the
+    // surviving task already holds, and two rows would then share a React key
+    // and a checkbox. Reading the highest id in use yields 3.
+    //
+    // Named for what it checks. An earlier name claimed this covered reuse
+    // after the highest id is removed, which it does not: removing id 2 leaves
+    // id 1, and handing out 2 again is correct, because nothing holds it.
     const tasks = removeTask(seededTasks(), FIRST_ID);
 
     expect(tasks[0]?.id).toBe(SECOND_ID);
