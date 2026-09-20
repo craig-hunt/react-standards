@@ -1,0 +1,18 @@
+node_modules
+dist
+build
+coverage
+*.min.js
+package-lock.json
+eslint.config.js
+
+# Stryker copies the project into here and runs against the copy. Formatting a
+# sandbox while a mutation run is using it edits a running process's working
+# files, and the directory is generated output besides.
+.stryker-tmp
+reports
+
+# Cypress writes these on failure.
+cypress/screenshots
+cypress/videos
+cypress/downloads

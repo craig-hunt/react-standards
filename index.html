@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!--
+      The Content Security Policy is a response header, not a meta tag. It
+      lives in public/_headers, which Cloudflare Pages and Netlify read at
+      deploy time.
+
+      Three reasons it is not here. A meta policy cannot express
+      frame-ancestors, so a page that sets it in markup is not refusing to be
+      framed however emphatically it appears to. It applies only from the point
+      the parser reaches it, leaving anything above unprotected. And a policy
+      compiled into the bundle cannot differ between environments, which is the
+      same coupling src/config/runtimeConfig.ts exists to avoid.
+    -->
+    <title>React Standards</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

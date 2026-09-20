@@ -1,0 +1,60 @@
+@import 'tailwindcss';
+
+/*
+  The palette is defined once as theme tokens rather than as colors chosen at
+  each call site. A component then names a role (surface, ink, line) instead of
+  a shade, and a change of palette touches this file alone.
+
+  Both schemes are defined. The light values sit on :root and the dark ones
+  under prefers-color-scheme, so the application follows the operating system
+  rather than asking the reader to state a preference the system already knows.
+
+  Contrast: every ink-on-surface and muted-on-surface pairing here clears the
+  4.5:1 that WCAG 2.2 AA asks for body text, which is why muted is a mid slate
+  rather than the light gray that usually reads as "secondary".
+*/
+@theme {
+  --font-sans: Inter, 'Segoe UI', system-ui, -apple-system, sans-serif;
+
+  --color-surface: oklch(1 0 0);
+  --color-panel: oklch(0.984 0.003 247.858);
+  --color-raised: oklch(0.929 0.013 255.508);
+  --color-ink: oklch(0.208 0.042 265.755);
+  --color-muted: oklch(0.446 0.043 257.281);
+  --color-line: oklch(0.869 0.022 252.894);
+  --color-accent: oklch(0.546 0.245 262.881);
+  --color-accent-ink: oklch(1 0 0);
+  --color-danger: oklch(0.505 0.213 27.518);
+  --color-done: oklch(0.508 0.118 165.612);
+}
+
+@media (prefers-color-scheme: dark) {
+  @theme {
+    --color-surface: oklch(0.129 0.042 264.695);
+    --color-panel: oklch(0.208 0.042 265.755);
+    --color-raised: oklch(0.279 0.041 260.031);
+    --color-ink: oklch(0.929 0.013 255.508);
+    --color-muted: oklch(0.704 0.04 256.788);
+    --color-line: oklch(0.279 0.041 260.031);
+    --color-accent: oklch(0.707 0.165 254.624);
+    --color-accent-ink: oklch(0.129 0.042 264.695);
+    --color-danger: oklch(0.704 0.191 22.216);
+    --color-done: oklch(0.765 0.177 163.223);
+  }
+}
+
+body {
+  background-color: var(--color-surface);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+}
+
+/*
+  A visible focus ring on every interactive element, never removed. Keyboard
+  users navigate by it, and WCAG 2.2 added a focus-appearance criterion partly
+  because so many designs delete it for looking untidy.
+*/
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}

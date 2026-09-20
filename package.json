@@ -1,0 +1,62 @@
+{
+  "name": "react-standards",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "A reference React application demonstrating the front-end standards I hold teams to.",
+  "license": "MIT",
+  "engines": {
+    "node": ">=22.12"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview --port 4173 --strictPort",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "typecheck": "tsc --noEmit && tsc --noEmit --project cypress/tsconfig.json",
+    "test": "vitest run",
+    "mutation": "stryker run",
+    "cypress:open": "cypress open",
+    "cypress:run": "cypress run",
+    "test:open": "start-server-and-test preview http://localhost:4173 cypress:open",
+    "test:run": "start-server-and-test preview http://localhost:4173 cypress:run",
+    "verify": "npm run lint && npm run format:check && npm run typecheck && npm run test && npm run build"
+  },
+  "dependencies": {
+    "@tanstack/react-query": "5.102.8",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "react-router": "8.3.1"
+  },
+  "devDependencies": {
+    "@eslint/js": "10.0.1",
+    "@stryker-mutator/core": "10.0.0",
+    "@stryker-mutator/vitest-runner": "10.0.0",
+    "@tailwindcss/vite": "4.3.3",
+    "@testing-library/dom": "10.4.1",
+    "@testing-library/jest-dom": "7.0.1",
+    "@testing-library/react": "16.3.3",
+    "@testing-library/user-event": "14.6.7",
+    "@types/node": "24.13.3",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "@vitejs/plugin-react": "6.1.1",
+    "axe-core": "4.13.0",
+    "cypress": "15.21.1",
+    "cypress-axe": "1.7.0",
+    "eslint": "10.10.0",
+    "eslint-config-prettier": "10.1.8",
+    "eslint-plugin-react-hooks": "7.1.1",
+    "jsdom": "30.0.1",
+    "prettier": "3.9.6",
+    "start-server-and-test": "2.1.2",
+    "tailwindcss": "4.3.3",
+    "typescript": "5.9.3",
+    "typescript-eslint": "8.70.0",
+    "vite": "8.3.0",
+    "vitest": "4.1.11"
+  }
+}

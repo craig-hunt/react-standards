@@ -1,0 +1,56 @@
+# The mutation gate runs nightly rather than on every pull request.
+#
+# Mutation testing re-runs the suite once per mutant, so its cost scales with
+# the product of the two. Measured here: 135 mutants against the full Vitest
+# suite projected to about 75 minutes, because each run paid a jsdom setup for
+# component tests that cover none of the mutated code.
+#
+# Two things follow, and the repository does both rather than choosing.
+#
+# vitest.mutation.config.ts narrows the runner to the logic tests in a node
+# environment, which addresses the cause. That is the fix; this schedule is the
+# safety margin.
+#
+# And the run still sits here rather than on the pull request. A developer
+# waiting on a long gate starts ignoring it, and a gate people ignore protects
+# nothing. Nightly catches the same regression within a day and never blocks a
+# merge. The CTO-in-a-Box DevOps guidance says the same: run the full suite
+# nightly or weekly, publish the scores, and act on the low-scoring modules.
+#
+# It can be run on demand when a change deserves it.
+
+name: mutation
+
+on:
+  schedule:
+    # Six in the morning UTC, the small hours in Eastern: the result is waiting
+    # rather than arriving mid-afternoon.
+    - cron: '0 6 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  NODE_VERSION: '24'
+
+jobs:
+  mutation:
+    name: mutation gate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      # thresholds.break in stryker.config.json exits non-zero below the score,
+      # which is what makes this a gate rather than a report. Coverage says a
+      # line ran; mutation says a test would have noticed if it were wrong.
+      - name: Mutation gate
+        run: npm run mutation
