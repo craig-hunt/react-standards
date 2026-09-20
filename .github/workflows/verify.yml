@@ -1,0 +1,126 @@
+# Everything a pull request has to pass.
+#
+# The jobs are separate rather than one long script so a failure names itself:
+# a red "regression" job says the assembled application broke where the pieces
+# meet, a red "unit" job says a rule broke, and a red "mutation" job says the
+# tests stopped noticing. Each reports independently instead of hiding behind
+# whichever step failed first.
+
+name: verify
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+env:
+  NODE_VERSION: '24'
+
+jobs:
+  static-analysis:
+    name: lint · format · typecheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Format check
+        run: npm run format:check
+
+      - name: Type check
+        run: npm run typecheck
+
+  unit:
+    name: unit and component tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Test
+        run: npm run test
+
+  # The mutation gate runs nightly, in mutation.yml, rather than here. It is a
+  # gate either way; the question is what it blocks. See that file for why.
+
+  regression:
+    name: regression and accessibility
+    runs-on: ubuntu-latest
+    needs: static-analysis
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      # The suite drives the built bundle through vite preview rather than the
+      # dev server, so it exercises the artifact a host would actually serve.
+      - name: Build
+        run: npm run build
+
+      - name: Cypress
+        run: npm run test:run
+
+      - name: Upload failure screenshots
+        if: failure()
+        uses: actions/upload-artifact@v5
+        with:
+          name: cypress-screenshots
+          path: cypress/screenshots
+          if-no-files-found: ignore
+
+  advisories:
+    name: dependency advisories
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      # --omit=dev reports what a deployed artifact would carry. Failing on a
+      # test runner's transitive advisory teaches a team to reach for --force,
+      # which is how a real finding slips through.
+      - name: Audit shipped dependencies
+        run: npm audit --omit=dev
+
+  secrets:
+    name: secret scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Scan history for secrets
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

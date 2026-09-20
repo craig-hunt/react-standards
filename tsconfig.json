@@ -1,0 +1,38 @@
+{
+  "compilerOptions": {
+    "target": "ES2023",
+    "lib": ["ES2023", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "jsx": "react-jsx",
+    "types": ["vite/client", "node"],
+
+    /* Strict throughout, and then the checks strict alone leaves off.
+       noUncheckedIndexedAccess is the one that changes how code reads: an
+       array index yields T | undefined, so a component cannot quietly assume
+       a row exists. exactOptionalPropertyTypes stops an explicit undefined
+       from masquerading as an absent property, which is the difference
+       between "no due date" and "I forgot to send one". */
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "noImplicitOverride": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+
+    "verbatimModuleSyntax": true,
+    "isolatedModules": true,
+    "moduleDetection": "force",
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "noEmit": true,
+    "allowImportingTsExtensions": false
+  },
+  /* The Cypress folder compiles under cypress/tsconfig.json, which carries the
+     Cypress types. Claiming it here pulls cy and Cypress into a project that
+     does not know them, and the compiler then reports dozens of missing names
+     that have nothing to do with the code. */
+  "include": ["src", "vite.config.ts", "vitest.mutation.config.ts"],
+  "exclude": ["dist", "node_modules"]
+}
